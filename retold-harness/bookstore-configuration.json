@@ -1,0 +1,26 @@
+{
+	"Product": "MeadowMSSQLTestBookstore",
+	"ProductVersion": "1.0.0",
+
+	"UUID":
+		{
+			"DataCenter": 0,
+			"Worker": 0
+		},
+	"LogStreams":
+		[
+			{
+				"streamtype": "console"
+			}
+		],
+
+	"MSSQL":
+		{
+			"server": "127.0.0.1",
+			"port": 3306,
+			"user": "sa",
+			"password": "1234567890abc.",
+			"database": "bookstore",
+			"ConnectionPoolLimit": 20
+		}
+}
