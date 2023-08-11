@@ -11,12 +11,12 @@
   "license": "MIT",
   "dependencies": {
     "async": "^3.2.4",
-    "fable": "^3.0.37",
-    "meadow": "^2.0.4",
+    "fable": "^3.0.75",
+    "meadow": "^2.0.9",
     "meadow-endpoints": "^4.0.2",
-    "mysql2": "^3.3.1",
-    "orator": "^3.0.11",
-    "orator-serviceserver-restify": "^1.0.4",
+    "mysql2": "^3.5.2",
+    "orator": "^4.0.1",
+    "orator-serviceserver-restify": "^2.0.1",
     "papaparse": "^5.4.1"
   }
 }
