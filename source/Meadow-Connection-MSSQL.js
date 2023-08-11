@@ -69,7 +69,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 
 		let tmpPrimaryKey = false;
 		let tmpCreateTableStatement = `--   [ ${pMeadowTableSchema.TableName} ]`;
-		tmpCreateTableStatement += `\nCREATE TABLE ${pMeadowTableSchema.TableName}\n    (`;
+		tmpCreateTableStatement += `\nCREATE TABLE [dbo].[${pMeadowTableSchema.TableName}]\n    (`;
 		for (let j = 0; j < pMeadowTableSchema.Columns.length; j++)
 		{
 			let tmpColumn = pMeadowTableSchema.Columns[j];
@@ -87,39 +87,39 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 				case 'ID':
 					if (this.options.AllowIdentityInsert)
 					{
-						tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL PRIMARY KEY`;
+						tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL PRIMARY KEY`;
 					}
 					else
 					{
 						// There is debate on whether IDENTITY(1,1) is better or not.
-						tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL IDENTITY PRIMARY KEY`;
+						tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL IDENTITY PRIMARY KEY`;
 					}
 					tmpPrimaryKey = tmpColumn.Column;
 					break;
 				case 'GUID':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
 					break;
 				case 'ForeignKey':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} INT UNSIGNED NOT NULL DEFAULT 0`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT UNSIGNED NOT NULL DEFAULT 0`;
 					tmpPrimaryKey = tmpColumn.Column;
 					break;
 				case 'Numeric':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL DEFAULT 0`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL DEFAULT 0`;
 					break;
 				case 'Decimal':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} DECIMAL(${tmpColumn.Size})`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] DECIMAL(${tmpColumn.Size})`;
 					break;
 				case 'String':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} CHAR(${tmpColumn.Size}) NOT NULL DEFAULT ''`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] CHAR(${tmpColumn.Size}) NOT NULL DEFAULT ''`;
 					break;
 				case 'Text':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} TEXT`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] TEXT`;
 					break;
 				case 'DateTime':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} DATETIME`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] DATETIME`;
 					break;
 				case 'Boolean':
-					tmpCreateTableStatement += `        ${tmpColumn.Column} TINYINT DEFAULT 0`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] TINYINT DEFAULT 0`;
 					break;
 				default:
 					break;

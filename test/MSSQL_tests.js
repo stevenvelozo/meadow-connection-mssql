@@ -71,7 +71,7 @@ suite
 								{
 									return fDone(pError);
 								}
-								_Fable.MeadowMSSQLProvider.pool.query(`SELECT TOP 10 * FROM Book`,
+								_Fable.MeadowMSSQLProvider.pool.query(`SELECT TOP 10 * FROM FableTest`,
 									(pError, pRows, pFields) =>
 									{
 										Expect(pRows.recordset).to.be.an('array');
