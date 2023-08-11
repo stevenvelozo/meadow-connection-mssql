@@ -85,12 +85,13 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			switch (tmpColumn.DataType)
 			{
 				case 'ID':
-					if (this.options.NO_PRIMARY_KEYS)
+					if (this.options.AllowIdentityInsert)
 					{
-						tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL`;
+						tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL PRIMARY KEY`;
 					}
 					else
 					{
+						// There is debate on whether IDENTITY(1,1) is better or not.
 						tmpCreateTableStatement += `        ${tmpColumn.Column} INT NOT NULL IDENTITY PRIMARY KEY`;
 					}
 					tmpPrimaryKey = tmpColumn.Column;
