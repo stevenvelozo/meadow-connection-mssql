@@ -85,19 +85,19 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			switch (tmpColumn.DataType)
 			{
 				case 'ID':
-					if (this.options.AllowIdentityInsert)
-					{
-						tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL PRIMARY KEY`;
-					}
-					else
-					{
-						// There is debate on whether IDENTITY(1,1) is better or not.
-						tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL IDENTITY PRIMARY KEY`;
-					}
+					// if (this.options.AllowIdentityInsert)
+					// {
+					// 	tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL PRIMARY KEY`;
+					// }
+					// else
+					// {
+					// There is debate on whether IDENTITY(1,1) is better or not.
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL IDENTITY PRIMARY KEY`;
+					//}
 					tmpPrimaryKey = tmpColumn.Column;
 					break;
 				case 'GUID':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(254) DEFAULT '00000000-0000-0000-0000-000000000000'`;
 					break;
 				case 'ForeignKey':
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT UNSIGNED NOT NULL DEFAULT 0`;
@@ -110,7 +110,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] DECIMAL(${tmpColumn.Size})`;
 					break;
 				case 'String':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] CHAR(${tmpColumn.Size}) NOT NULL DEFAULT ''`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(${tmpColumn.Size}) DEFAULT ''`;
 					break;
 				case 'Text':
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] TEXT`;
