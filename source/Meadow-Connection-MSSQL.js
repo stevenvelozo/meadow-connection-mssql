@@ -57,8 +57,8 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 
 	generateDropTableStatement(pTableName)
 	{
-		let tmpDropTableStatement = `IF OBJECT_ID('dbo.${pTableName}', 'U') IS NOT NULL\n`;
-		tmpDropTableStatement += `    DROP TABLE dbo.${pTableName};\n`;
+		let tmpDropTableStatement = `IF OBJECT_ID('dbo.[${pTableName}]', 'U') IS NOT NULL\n`;
+		tmpDropTableStatement += `    DROP TABLE dbo.[${pTableName}];\n`;
 		tmpDropTableStatement += `GO`;
 		return tmpDropTableStatement;
 	}
@@ -131,7 +131,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 		}
 		tmpCreateTableStatement += `\n    );`;
 
-		this.log.info(`Generated Create Table Statement: ${tmpCreateTableStatement}`);
+		//this.log.info(`Generated Create Table Statement: ${tmpCreateTableStatement}`);
 
 		return tmpCreateTableStatement;
 	}
@@ -175,14 +175,14 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 					&& (pError.originalError.info.message.indexOf('in the database.') > 0))
 				{
 					// The table already existed; log a warning but keep on keeping on.
-					this.log.warn(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} executed but table already existed.`);
-					this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
+					//this.log.warn(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} executed but table already existed.`);
+					//this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
 					return fCallback();
 				}
 				else
 				{
 					this.log.error(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} failed!`, pError);
-					this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
+					//this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
 					return fCallback(pError);
 				}
 			});

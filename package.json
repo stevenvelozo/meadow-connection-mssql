@@ -1,6 +1,6 @@
 {
     "name": "meadow-connection-mssql",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Meadow MSSQL Plugin",
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
