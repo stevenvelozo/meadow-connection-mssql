@@ -32,7 +32,8 @@ const _FableConfig = (
 
 		"MSSQL":
 			{
-				"server": "127.0.0.1",
+				"server": "localhost",
+				"port": 14333,
 				"user": "sa",
 				"password": "1234567890abc.",
 				"database": "bookstore",

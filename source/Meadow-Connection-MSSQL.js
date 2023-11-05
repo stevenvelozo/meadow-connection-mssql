@@ -36,6 +36,14 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			{
 				this.options.server = this.fable.settings.MSSQL.server;
 			}
+			if (this.fable.settings.MSSQL.hasOwnProperty('port'))
+			{
+				this.options.port = this.fable.settings.MSSQL.port;
+			}
+			else
+			{
+				this.options.port = 1433;
+			}
 			if (this.fable.settings.MSSQL.hasOwnProperty('user'))
 			{
 				this.options.user = this.fable.settings.MSSQL.user;
@@ -210,7 +218,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 				database: this.options.database,
 				requestTimeout: 80000,
 				connectionTimeout: 80000,
-				port: 1433,
+				port: this.options.port,
 				pool:
 				{
 					max: 10,
