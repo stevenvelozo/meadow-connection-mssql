@@ -156,7 +156,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			{
 				if (pCreateError)
 				{
-					this.log.error(`Meadow-MSSQL Error creating tables from Schema: ${pCreateError}`,pCreateError);
+					this.log.error(`Meadow-MSSQL Error creating tables from Schema: ${pCreateError.message}`,pCreateError);
 				}
 				this.log.info('Done creating tables!');
 				return fCallback(pCreateError);
@@ -189,7 +189,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 				}
 				else
 				{
-					this.log.error(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} failed!`, pError);
+					this.log.error(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} failed! (${pError.message})`, pError);
 					//this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
 					return fCallback(pError);
 				}
@@ -210,27 +210,42 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			this.log.error(`Meadow MSSQL connect() called without a callback; this could lead to connection race conditions.`);
 			tmpCallback = () => { };
 		}
-		let tmpConnectionSettings = (
+
+		const defaultTimeout = 80000;
+		const tmpConnectionSettings = (
 			{
 				server: this.options.server,
 				user: this.options.user,
 				password: this.options.password,
 				database: this.options.database,
-				requestTimeout: 80000,
-				connectionTimeout: 80000,
+				requestTimeout: this.options.requestTimeout ?? defaultTimeout,
+				connectionTimeout: this.options.connectionTimeout ?? defaultTimeout,
 				port: this.options.port,
 				pool:
 				{
-					max: 10,
-					min: 0,
-					idleTimeoutMillis: 30000
+					max: this.options.poolMax ?? 25,
+					min: this.options.poolMin ?? 1,
+					idleTimeoutMillis: this.options.poolIdleTimeoutMillis ?? 30000,
+					acquireTimeoutMillis: this.options.poolAcquireTimeoutMillis ?? defaultTimeout,
+					createTimeoutMillis: this.options.poolCreateTimeoutMillis ?? defaultTimeout,
+					destroyTimeoutMillis: this.options.poolDestroyTimeoutMillis ?? defaultTimeout,
+					reapIntervalMillis: this.options.poolReapIntervalMillis ?? 10000,
+					createRetryIntervalMillis: this.options.poolCreateRetryTimeoutMillis ?? 5000,
 				},
 				options:
 				{
-					useUTC: false,
-					trustServerCertificate: true // change to true for local dev / self-signed customer certs
+					useUTC: this.options.useUTC ?? false,
+					trustServerCertificate: this.options.trustServerCertificate ?? true // change to true for local dev / self-signed customer certs
 				},
 			});
+
+		// alternate method of customizing settings - provide full object (ex. in case there are settings not being set above that are needed)
+		// we will merge the user's settings on top of the defaults at the field grain
+		if (this.options.MSSQLConnectSettingOverrides)
+		{
+			// for fable 2.x vs 3+ compatibility
+			(this.fable.settingsManager || this.fable.SettingsManager).merge(this.options.MSSQLConnectSettingOverrides, tmpConnectionSettings);
+		}
 		if (this._ConnectionPool)
 		{
 			tmpCleansedLogSettings = JSON.parse(JSON.stringify(tmpConnectionSettings));
@@ -254,7 +269,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 				.catch(
 					(pError) =>
 					{
-						this.log.error(`Meadow-Connection-MSSQL error connecting to MSSQL at [${tmpConnectionSettings.server} : ${tmpConnectionSettings.port}] as ${tmpConnectionSettings.user} for database ${tmpConnectionSettings.database} at a connection limit of ${tmpConnectionSettings.pool.max}.`, pError);
+						this.log.error(`Meadow-Connection-MSSQL error connecting to MSSQL at [${tmpConnectionSettings.server} : ${tmpConnectionSettings.port}] as ${tmpConnectionSettings.user} for database ${tmpConnectionSettings.database} at a connection limit of ${tmpConnectionSettings.pool.max}. (${pError.message})`, pError);
 						return tmpCallback(pError);
 					});
 		}
