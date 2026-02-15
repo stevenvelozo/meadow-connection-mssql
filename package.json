@@ -45,10 +45,10 @@
     },
     "homepage": "https://github.com/stevenvelozo/meadow-connection-mssql",
     "devDependencies": {
-        "quackage": "^1.0.19"
+        "quackage": "^1.0.48"
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.4",
+        "fable-serviceproviderbase": "^3.0.16",
         "mssql": "^9.1.1"
     }
 }
