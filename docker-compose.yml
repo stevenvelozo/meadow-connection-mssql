@@ -1,0 +1,12 @@
+services:
+  mssql-test:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: meadow-connection-mssql-test
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Retold1234567890!"
+    ports:
+      - "21433:1433"
+    volumes:
+      - ./test/docker-init:/docker-init

@@ -1,11 +1,14 @@
 {
     "name": "meadow-connection-mssql",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "Meadow MSSQL Plugin",
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
         "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -u tdd -R spec",
-        "test": "./node_modules/mocha/bin/_mocha -u tdd -R spec",
+        "test": "./node_modules/mocha/bin/_mocha -u tdd --exit -R spec",
+        "docker-mssql-start": "bash ./start-mssql.sh",
+        "docker-mssql-stop": "bash ./stop-mssql.sh",
+        "test-docker": "bash ./start-mssql.sh && npm test; bash ./stop-mssql.sh",
         "docker-dev-build": "docker build ./ -f Dockerfile_LUXURYCode -t retold/meadow-connection-mssql:local",
         "docker-dev-run": "docker run -it -d --name retold-meadow-connection-mssql-dev -p 38001:8080 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/meadow-connection-mssql\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" retold/meadow-connection-mssql:local",
         "docker-dev-shell": "docker exec -it retold-meadow-connection-mssql-dev /bin/bash",
@@ -45,10 +48,13 @@
     },
     "homepage": "https://github.com/stevenvelozo/meadow-connection-mssql",
     "devDependencies": {
-        "quackage": "^1.0.48"
+        "chai": "4.3.10",
+        "fable": "^3.1.55",
+        "mocha": "10.2.0",
+        "quackage": "^1.0.51"
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.16",
+        "fable-serviceproviderbase": "^3.0.18",
         "mssql": "^9.1.1"
     }
 }

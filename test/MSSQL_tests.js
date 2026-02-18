@@ -33,9 +33,9 @@ const _FableConfig = (
 		"MSSQL":
 			{
 				"server": "localhost",
-				"port": 14333,
+				"port": 21433,
 				"user": "sa",
-				"password": "1234567890abc.",
+				"password": "Retold1234567890!",
 				"database": "bookstore",
 				"ConnectionPoolLimit": 20
 			}
@@ -76,8 +76,8 @@ suite
 									(pError, pRows, pFields) =>
 									{
 										Expect(pRows.recordset).to.be.an('array');
-										//Expect(pRows.length).to.equal(10);
-										//Expect(pRows[0].Title).to.equal(`Harry Potter and the Philosopher's Stone`);
+										Expect(pRows.recordset.length).to.equal(10);
+										Expect(pRows.recordset[0].Title).to.equal(`The Hunger Games`);
 										return fDone();
 									});
 							}
