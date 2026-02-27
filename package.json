@@ -5,7 +5,7 @@
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
         "coverage": "npx quack coverage",
-        "test": "npx mocha -u tdd --exit -R spec",
+        "test": "npx quack test",
         "docker-mssql-start": "bash ./start-mssql.sh",
         "docker-mssql-stop": "bash ./stop-mssql.sh",
         "test-docker": "bash ./start-mssql.sh && npm test; bash ./stop-mssql.sh",
@@ -13,7 +13,7 @@
         "docker-dev-run": "docker run -it -d --name retold-meadow-connection-mssql-dev -p 38001:8080 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/meadow-connection-mssql\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" retold/meadow-connection-mssql:local",
         "docker-dev-shell": "docker exec -it retold-meadow-connection-mssql-dev /bin/bash",
         "start": "node source/Meadow-Connection-MSSQL.js",
-        "tests": "npx mocha -u tdd --exit -R spec --grep",
+        "tests": "npx quack test -g",
         "build": "npx quack build"
     },
     "mocha": {
