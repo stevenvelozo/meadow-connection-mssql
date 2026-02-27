@@ -1,6 +1,6 @@
 {
     "name": "meadow-connection-mssql",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "Meadow MSSQL Plugin",
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
@@ -52,7 +52,7 @@
         "quackage": "^1.0.58"
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.18",
+        "fable-serviceproviderbase": "^3.0.19",
         "mssql": "^9.1.1"
     }
 }
