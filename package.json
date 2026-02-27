@@ -4,8 +4,8 @@
     "description": "Meadow MSSQL Plugin",
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
-        "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -u tdd -R spec",
-        "test": "./node_modules/mocha/bin/_mocha -u tdd --exit -R spec",
+        "coverage": "npx quack coverage",
+        "test": "npx mocha -u tdd --exit -R spec",
         "docker-mssql-start": "bash ./start-mssql.sh",
         "docker-mssql-stop": "bash ./stop-mssql.sh",
         "test-docker": "bash ./start-mssql.sh && npm test; bash ./stop-mssql.sh",
