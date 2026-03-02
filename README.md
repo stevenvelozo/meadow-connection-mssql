@@ -10,13 +10,14 @@ A Microsoft SQL Server connection provider for the Meadow ORM. Wraps [mssql](htt
 
 ## Features
 
-- **MSSQL Connection Pooling** - Managed connection pool via [mssql](https://github.com/tediousjs/node-mssql) (Tedious driver)
-- **Fable Service Provider** - Registers with a Fable instance for dependency injection, logging, and configuration
-- **Async Connection** - Truly asynchronous connection flow with promise-based pool creation and callback interface
-- **Prepared Statements** - Built-in `preparedStatement` getter for creating parameterized queries against the pool
-- **Schema-Driven DDL** - Generates `CREATE TABLE` statements with `[dbo]` schema prefix, `IDENTITY` primary keys, and proper MSSQL column types
-- **Connection Safety** - Guards against duplicate connection pools with descriptive logging (passwords are never leaked)
-- **Configurable Timeouts** - Request timeout (80s) and connection timeout (80s) with pool idle timeout (30s) defaults
+- **MSSQL Connection Pooling** -- Managed connection pool via [mssql](https://github.com/tediousjs/node-mssql) (Tedious driver)
+- **Fable Service Provider** -- Registers with a Fable instance for dependency injection, logging, and configuration
+- **Async Connection** -- Truly asynchronous connection flow with promise-based pool creation and callback interface
+- **Prepared Statements** -- Built-in `preparedStatement` getter for creating parameterized queries against the pool
+- **Direct Driver Access** -- `MSSQL` getter exposes the raw `mssql` package for type constants (`Int`, `VarChar`, `Decimal`, etc.)
+- **Schema-Driven DDL** -- Generates `CREATE TABLE` statements with `[dbo]` schema prefix, `IDENTITY` primary keys, and proper MSSQL column types
+- **Connection Safety** -- Guards against duplicate connection pools with descriptive logging (passwords are never leaked)
+- **Configurable Timeouts** -- Request timeout (80s) and connection timeout (80s) with pool idle timeout (30s) defaults
 
 ## Installation
 
@@ -171,13 +172,13 @@ Generate a safe `DROP TABLE` statement using `IF OBJECT_ID` to check existence b
 
 Meadow Connection MSSQL is a database connector for the Meadow data access layer:
 
-- [meadow](https://github.com/stevenvelozo/meadow) - ORM and data access framework
-- [foxhound](https://github.com/stevenvelozo/foxhound) - Query DSL used by Meadow
-- [stricture](https://github.com/stevenvelozo/stricture) - Schema definition tool
-- [meadow-endpoints](https://github.com/stevenvelozo/meadow-endpoints) - RESTful endpoint generation
-- [meadow-connection-mysql](https://github.com/stevenvelozo/meadow-connection-mysql) - MySQL connector
-- [meadow-connection-sqlite](https://github.com/stevenvelozo/meadow-connection-sqlite) - SQLite connector
-- [fable](https://github.com/stevenvelozo/fable) - Application services framework
+- [meadow](https://github.com/stevenvelozo/meadow) -- ORM and data access framework
+- [foxhound](https://github.com/stevenvelozo/foxhound) -- Query DSL used by Meadow
+- [stricture](https://github.com/stevenvelozo/stricture) -- Schema definition tool
+- [meadow-endpoints](https://github.com/stevenvelozo/meadow-endpoints) -- RESTful endpoint generation
+- [meadow-connection-mysql](https://github.com/stevenvelozo/meadow-connection-mysql) -- MySQL connector
+- [meadow-connection-sqlite](https://github.com/stevenvelozo/meadow-connection-sqlite) -- SQLite connector
+- [fable](https://github.com/stevenvelozo/fable) -- Application services framework
 
 ## Testing
 
@@ -195,8 +196,10 @@ npm run coverage
 
 ## Related Packages
 
-- [meadow](https://github.com/stevenvelozo/meadow) - Data access and ORM
-- [fable](https://github.com/stevenvelozo/fable) - Application services framework
+- [meadow](https://github.com/stevenvelozo/meadow) -- Data access and ORM
+- [meadow-connection-mysql](https://github.com/stevenvelozo/meadow-connection-mysql) -- MySQL connection provider
+- [meadow-connection-rocksdb](https://github.com/stevenvelozo/meadow-connection-rocksdb) -- RocksDB connection provider
+- [fable](https://github.com/stevenvelozo/fable) -- Application services framework
 
 ## License
 
