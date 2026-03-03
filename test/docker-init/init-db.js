@@ -62,49 +62,56 @@ async function run()
 			process.exit(0);
 		}
 
-		// Read the SQL file and split on GO statements
-		let tmpSQLPath = libPath.join(__dirname, '01-schema.sql');
-		let tmpSQL = libFS.readFileSync(tmpSQLPath, 'utf8');
+		// Read all SQL files in order
+		let tmpSQLFiles = libFS.readdirSync(__dirname)
+			.filter((pFile) => pFile.endsWith('.sql'))
+			.sort();
 
-		// Split on GO lines (MSSQL batch separator)
-		let tmpBatches = tmpSQL.split(/^\s*GO\s*$/mi).filter((pBatch) => pBatch.trim().length > 0);
-
-		console.log(`Running ${tmpBatches.length} SQL batches...`);
-		for (let i = 0; i < tmpBatches.length; i++)
+		for (let tmpFileIndex = 0; tmpFileIndex < tmpSQLFiles.length; tmpFileIndex++)
 		{
-			let tmpBatch = tmpBatches[i].trim();
-			if (tmpBatch.length === 0)
-			{
-				continue;
-			}
+			let tmpSQLPath = libPath.join(__dirname, tmpSQLFiles[tmpFileIndex]);
+			let tmpSQL = libFS.readFileSync(tmpSQLPath, 'utf8');
 
-			// After CREATE DATABASE, reconnect to bookstore
-			if (tmpBatch.toUpperCase().indexOf('CREATE DATABASE') >= 0)
-			{
-				await tmpPool.query(tmpBatch);
-				console.log(`  Batch ${i + 1}: CREATE DATABASE bookstore`);
-				await tmpPool.close();
-				// Delay for database to be ready (especially under Rosetta emulation)
-				await new Promise((fResolve) => setTimeout(fResolve, 3000));
-				tmpPool = await connectWithRetry(Object.assign({}, MSSQL_CONFIG, { database: 'bookstore' }));
-				continue;
-			}
+			// Split on GO lines (MSSQL batch separator)
+			let tmpBatches = tmpSQL.split(/^\s*GO\s*$/mi).filter((pBatch) => pBatch.trim().length > 0);
 
-			// Skip USE statements (we already connected to the right DB)
-			if (tmpBatch.toUpperCase().indexOf('USE BOOKSTORE') >= 0)
+			console.log(`Processing ${tmpSQLFiles[tmpFileIndex]} (${tmpBatches.length} batches)...`);
+			for (let i = 0; i < tmpBatches.length; i++)
 			{
-				continue;
-			}
+				let tmpBatch = tmpBatches[i].trim();
+				if (tmpBatch.length === 0)
+				{
+					continue;
+				}
 
-			try
-			{
-				await tmpPool.query(tmpBatch);
-				console.log(`  Batch ${i + 1}: OK`);
-			}
-			catch (pError)
-			{
-				console.error(`  Batch ${i + 1}: ERROR - ${pError.message}`);
-				console.error(`  SQL: ${tmpBatch.substring(0, 100)}...`);
+				// After CREATE DATABASE, reconnect to bookstore
+				if (tmpBatch.toUpperCase().indexOf('CREATE DATABASE') >= 0)
+				{
+					await tmpPool.query(tmpBatch);
+					console.log(`  Batch ${i + 1}: CREATE DATABASE bookstore`);
+					await tmpPool.close();
+					// Delay for database to be ready (especially under Rosetta emulation)
+					await new Promise((fResolve) => setTimeout(fResolve, 3000));
+					tmpPool = await connectWithRetry(Object.assign({}, MSSQL_CONFIG, { database: 'bookstore' }));
+					continue;
+				}
+
+				// Skip USE statements (we already connected to the right DB)
+				if (tmpBatch.toUpperCase().indexOf('USE BOOKSTORE') >= 0)
+				{
+					continue;
+				}
+
+				try
+				{
+					await tmpPool.query(tmpBatch);
+					console.log(`  Batch ${i + 1}: OK`);
+				}
+				catch (pError)
+				{
+					console.error(`  Batch ${i + 1}: ERROR - ${pError.message}`);
+					console.error(`  SQL: ${tmpBatch.substring(0, 100)}...`);
+				}
 			}
 		}
 

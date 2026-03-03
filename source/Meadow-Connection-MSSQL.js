@@ -6,6 +6,8 @@ const libFableServiceProviderBase = require('fable-serviceproviderbase');
 
 const libMSSQL = require('mssql');
 
+const libMeadowSchemaMSSQL = require('./Meadow-Schema-MSSQL.js');
+
 /*
 	Das alt muster:
 
@@ -30,170 +32,100 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 
 		this.connected = false;
 
-		if (this.fable.settings.hasOwnProperty('MSSQL'))
-		{
-			if (this.fable.settings.MSSQL.hasOwnProperty('server'))
-			{
-				this.options.server = this.fable.settings.MSSQL.server;
-			}
-			if (this.fable.settings.MSSQL.hasOwnProperty('port'))
-			{
-				this.options.port = this.fable.settings.MSSQL.port;
-			}
-			else
-			{
-				this.options.port = 1433;
-			}
-			if (this.fable.settings.MSSQL.hasOwnProperty('user'))
-			{
-				this.options.user = this.fable.settings.MSSQL.user;
-			}
-			if (this.fable.settings.MSSQL.hasOwnProperty('password'))
-			{
-				this.options.password = this.fable.settings.MSSQL.password;
-			}
-			if (this.fable.settings.MSSQL.hasOwnProperty('database'))
-			{
-				this.options.database = this.fable.settings.MSSQL.database;
-			}
-			if (this.fable.settings.MSSQL.hasOwnProperty('MeadowConnectionMSSQLAutoConnect'))
-			{
-				this.options.MeadowConnectionMSSQLAutoConnect = this.fable.settings.MSSQL.MeadowConnectionMSSQLAutoConnect;
-			}
-		}
+		// Schema provider handles DDL operations (create, drop, index, etc.)
+		this._SchemaProvider = new libMeadowSchemaMSSQL(this.fable, this.options, `${this.Hash}-Schema`);
+	}
+
+	get schemaProvider()
+	{
+		return this._SchemaProvider;
 	}
 
 	generateDropTableStatement(pTableName)
 	{
-		let tmpDropTableStatement = `IF OBJECT_ID('dbo.[${pTableName}]', 'U') IS NOT NULL\n`;
-		tmpDropTableStatement += `    DROP TABLE dbo.[${pTableName}];\n`;
-		tmpDropTableStatement += `GO`;
-		return tmpDropTableStatement;
+		return this._SchemaProvider.generateDropTableStatement(pTableName);
 	}
 
 	generateCreateTableStatement(pMeadowTableSchema)
 	{
-		this.log.info(`--> Building the table create string for ${pMeadowTableSchema} ...`);
-
-		let tmpPrimaryKey = false;
-		let tmpCreateTableStatement = `--   [ ${pMeadowTableSchema.TableName} ]`;
-		tmpCreateTableStatement += `\nCREATE TABLE [dbo].[${pMeadowTableSchema.TableName}]\n    (`;
-		for (let j = 0; j < pMeadowTableSchema.Columns.length; j++)
-		{
-			let tmpColumn = pMeadowTableSchema.Columns[j];
-
-			// If we aren't the first column, append a comma.
-			if (j > 0)
-			{
-				tmpCreateTableStatement += `,`;
-			}
-
-			tmpCreateTableStatement += `\n`;
-			// Dump out each column......
-			switch (tmpColumn.DataType)
-			{
-				case 'ID':
-					// if (this.options.AllowIdentityInsert)
-					// {
-					// 	tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL PRIMARY KEY`;
-					// }
-					// else
-					// {
-					// There is debate on whether IDENTITY(1,1) is better or not.
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL IDENTITY PRIMARY KEY`;
-					//}
-					tmpPrimaryKey = tmpColumn.Column;
-					break;
-				case 'GUID':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(254) DEFAULT '00000000-0000-0000-0000-000000000000'`;
-					break;
-				case 'ForeignKey':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT UNSIGNED NOT NULL DEFAULT 0`;
-					tmpPrimaryKey = tmpColumn.Column;
-					break;
-				case 'Numeric':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL DEFAULT 0`;
-					break;
-				case 'Decimal':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] DECIMAL(${tmpColumn.Size})`;
-					break;
-				case 'String':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(${tmpColumn.Size}) DEFAULT ''`;
-					break;
-				case 'Text':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] TEXT`;
-					break;
-				case 'DateTime':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] DATETIME`;
-					break;
-				case 'Boolean':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] TINYINT DEFAULT 0`;
-					break;
-				default:
-					break;
-			}
-		}
-		if (tmpPrimaryKey)
-		{
-			//				tmpCreateTableStatement += `,\n\n        PRIMARY KEY (${tmpPrimaryKey$})`;
-		}
-		tmpCreateTableStatement += `\n    );`;
-
-		//this.log.info(`Generated Create Table Statement: ${tmpCreateTableStatement}`);
-
-		return tmpCreateTableStatement;
+		return this._SchemaProvider.generateCreateTableStatement(pMeadowTableSchema);
 	}
 
 	createTables(pMeadowSchema, fCallback)
 	{
-		// Now create the Book databases if they don't exist.
-		this.fable.Utility.eachLimit(pMeadowSchema.Tables, 1,
-			(pTable, fCreateComplete) =>
-			{
-				return this.createTable(pTable, fCreateComplete)
-			},
-			(pCreateError) =>
-			{
-				if (pCreateError)
-				{
-					this.log.error(`Meadow-MSSQL Error creating tables from Schema: ${pCreateError}`,pCreateError);
-				}
-				this.log.info('Done creating tables!');
-				return fCallback(pCreateError);
-			});
+		return this._SchemaProvider.createTables(pMeadowSchema, fCallback);
 	}
 
 	createTable(pMeadowTableSchema, fCallback)
 	{
-		let tmpCreateTableStatement = this.generateCreateTableStatement(pMeadowTableSchema);
-		this._ConnectionPool.query(tmpCreateTableStatement)
-			.then((pResult) =>
-			{
-				this.log.info(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} Success`);
-				this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
-				return fCallback();
-			})
-			.catch((pError) =>
-			{
-				if (pError.hasOwnProperty('originalError')
-					// TODO: This check may be extraneous; not familiar enough with the mssql node driver yet
-					&& (pError.originalError.hasOwnProperty('info'))
-					// TODO: Validate that there isn't a better way to find this (pError.code isn't explicit enough)
-					&& (pError.originalError.info.message.indexOf("There is already an object named") == 0)
-					&& (pError.originalError.info.message.indexOf('in the database.') > 0))
-				{
-					// The table already existed; log a warning but keep on keeping on.
-					//this.log.warn(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} executed but table already existed.`);
-					//this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
-					return fCallback();
-				}
-				else
-				{
-					this.log.error(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} failed!`, pError);
-					//this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
-					return fCallback(pError);
-				}
-			});
+		return this._SchemaProvider.createTable(pMeadowTableSchema, fCallback);
+	}
+
+	getIndexDefinitionsFromSchema(pMeadowTableSchema)
+	{
+		return this._SchemaProvider.getIndexDefinitionsFromSchema(pMeadowTableSchema);
+	}
+
+	generateCreateIndexScript(pMeadowTableSchema)
+	{
+		return this._SchemaProvider.generateCreateIndexScript(pMeadowTableSchema);
+	}
+
+	generateCreateIndexStatements(pMeadowTableSchema)
+	{
+		return this._SchemaProvider.generateCreateIndexStatements(pMeadowTableSchema);
+	}
+
+	createIndex(pIndexStatement, fCallback)
+	{
+		return this._SchemaProvider.createIndex(pIndexStatement, fCallback);
+	}
+
+	createIndices(pMeadowTableSchema, fCallback)
+	{
+		return this._SchemaProvider.createIndices(pMeadowTableSchema, fCallback);
+	}
+
+	createAllIndices(pMeadowSchema, fCallback)
+	{
+		return this._SchemaProvider.createAllIndices(pMeadowSchema, fCallback);
+	}
+
+	// Database Introspection delegation
+
+	listTables(fCallback)
+	{
+		return this._SchemaProvider.listTables(fCallback);
+	}
+
+	introspectTableColumns(pTableName, fCallback)
+	{
+		return this._SchemaProvider.introspectTableColumns(pTableName, fCallback);
+	}
+
+	introspectTableIndices(pTableName, fCallback)
+	{
+		return this._SchemaProvider.introspectTableIndices(pTableName, fCallback);
+	}
+
+	introspectTableForeignKeys(pTableName, fCallback)
+	{
+		return this._SchemaProvider.introspectTableForeignKeys(pTableName, fCallback);
+	}
+
+	introspectTableSchema(pTableName, fCallback)
+	{
+		return this._SchemaProvider.introspectTableSchema(pTableName, fCallback);
+	}
+
+	introspectDatabaseSchema(fCallback)
+	{
+		return this._SchemaProvider.introspectDatabaseSchema(fCallback);
+	}
+
+	generateMeadowPackageFromTable(pTableName, fCallback)
+	{
+		return this._SchemaProvider.generateMeadowPackageFromTable(pTableName, fCallback);
 	}
 
 	connect()
@@ -249,6 +181,7 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 						this.log.info(`Meadow-Connection-MSSQL successfully connected to MSSQL at [${tmpConnectionSettings.server} : ${tmpConnectionSettings.port}] as ${tmpConnectionSettings.user} for database ${tmpConnectionSettings.database} at a connection limit of ${tmpConnectionSettings.pool.max}.`);
 						this._ConnectionPool = pConnectionPool;
 						this.connected = true;
+						this._SchemaProvider.setConnectionPool(this._ConnectionPool);
 						return tmpCallback(null, this._ConnectionPool)
 					})
 				.catch(
