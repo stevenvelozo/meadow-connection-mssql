@@ -1,6 +1,6 @@
 {
     "name": "meadow-connection-mssql",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "description": "Meadow MSSQL Plugin",
     "main": "source/Meadow-Connection-MSSQL.js",
     "scripts": {
@@ -48,7 +48,7 @@
     },
     "homepage": "https://github.com/stevenvelozo/meadow-connection-mssql",
     "devDependencies": {
-        "fable": "^3.1.55",
+        "fable": "^3.1.63",
         "quackage": "^1.0.59"
     },
     "dependencies": {
