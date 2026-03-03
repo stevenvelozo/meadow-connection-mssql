@@ -32,6 +32,59 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 
 		this.connected = false;
 
+		// Resolve MSSQL connection settings from options or fable settings
+		if (typeof(this.options.MSSQL) == 'object')
+		{
+			// Options were passed in with an MSSQL sub-object; coerce PascalCase to lowercase
+			if (!this.options.MSSQL.hasOwnProperty('server') && this.options.MSSQL.hasOwnProperty('Server'))
+			{
+				this.options.MSSQL.server = this.options.MSSQL.Server;
+			}
+			if (!this.options.MSSQL.hasOwnProperty('port') && this.options.MSSQL.hasOwnProperty('Port'))
+			{
+				this.options.MSSQL.port = this.options.MSSQL.Port;
+			}
+			if (!this.options.MSSQL.hasOwnProperty('user') && this.options.MSSQL.hasOwnProperty('User'))
+			{
+				this.options.MSSQL.user = this.options.MSSQL.User;
+			}
+			if (!this.options.MSSQL.hasOwnProperty('password') && this.options.MSSQL.hasOwnProperty('Password'))
+			{
+				this.options.MSSQL.password = this.options.MSSQL.Password;
+			}
+			if (!this.options.MSSQL.hasOwnProperty('database') && this.options.MSSQL.hasOwnProperty('Database'))
+			{
+				this.options.MSSQL.database = this.options.MSSQL.Database;
+			}
+		}
+		else if (typeof(this.options.server) === 'string')
+		{
+			// Options were passed in flat (already has server, user, etc.)
+			this.options.MSSQL = (
+				{
+					server: this.options.server,
+					port: this.options.port,
+					user: this.options.user,
+					password: this.options.password,
+					database: this.options.database,
+					ConnectionPoolLimit: this.options.ConnectionPoolLimit
+				});
+		}
+		else if (typeof(this.fable.settings.MSSQL) == 'object')
+		{
+			// Fall back to fable settings
+			let tmpSettings = this.fable.settings.MSSQL;
+			this.options.MSSQL = (
+				{
+					server: tmpSettings.server || tmpSettings.Server,
+					port: tmpSettings.port || tmpSettings.Port,
+					user: tmpSettings.user || tmpSettings.User,
+					password: tmpSettings.password || tmpSettings.Password,
+					database: tmpSettings.database || tmpSettings.Database,
+					ConnectionPoolLimit: tmpSettings.ConnectionPoolLimit
+				});
+		}
+
 		// Schema provider handles DDL operations (create, drop, index, etc.)
 		this._SchemaProvider = new libMeadowSchemaMSSQL(this.fable, this.options, `${this.Hash}-Schema`);
 	}
@@ -142,18 +195,19 @@ class MeadowConnectionMSSQL extends libFableServiceProviderBase
 			this.log.error(`Meadow MSSQL connect() called without a callback; this could lead to connection race conditions.`);
 			tmpCallback = () => { };
 		}
+		let tmpMSSQLSettings = this.options.MSSQL || {};
 		let tmpConnectionSettings = (
 			{
-				server: this.options.server,
-				user: this.options.user,
-				password: this.options.password,
-				database: this.options.database,
+				server: tmpMSSQLSettings.server,
+				user: tmpMSSQLSettings.user,
+				password: tmpMSSQLSettings.password,
+				database: tmpMSSQLSettings.database,
 				requestTimeout: 80000,
 				connectionTimeout: 80000,
-				port: this.options.port,
+				port: tmpMSSQLSettings.port,
 				pool:
 				{
-					max: 10,
+					max: tmpMSSQLSettings.ConnectionPoolLimit || 10,
 					min: 0,
 					idleTimeoutMillis: 30000
 				},

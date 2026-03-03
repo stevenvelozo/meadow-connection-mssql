@@ -70,7 +70,7 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(254) DEFAULT '00000000-0000-0000-0000-000000000000'`;
 					break;
 				case 'ForeignKey':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT UNSIGNED NOT NULL DEFAULT 0`;
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL DEFAULT 0`;
 					tmpPrimaryKey = tmpColumn.Column;
 					break;
 				case 'Numeric':
