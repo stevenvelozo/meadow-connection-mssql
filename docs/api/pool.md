@@ -44,7 +44,7 @@ _Fable.MeadowMSSQLProvider.connectAsync(
 
 The mssql pool exposes these primary methods:
 
-### query(sql) → Promise
+### query(sql) -> Promise
 
 Execute a SQL query. Returns a Promise:
 

@@ -140,7 +140,7 @@ pool.query('SELECT TOP 10 * FROM Book')
 
 ### Prepared Statement
 
-Use `preparedStatement` for parameterized queries with typed inputs. Requires a manual lifecycle (prepare → execute → unprepare):
+Use `preparedStatement` for parameterized queries with typed inputs. Requires a manual lifecycle (prepare -> execute -> unprepare):
 
 ```javascript
 let ps = connection.preparedStatement;

@@ -85,11 +85,11 @@ let fable = new libFable(
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `server` | `String` | — | SQL Server hostname or IP address |
+| `server` | `String` | -- | SQL Server hostname or IP address |
 | `port` | `Number` | `1433` | TCP port |
-| `user` | `String` | — | Login user |
-| `password` | `String` | — | Login password |
-| `database` | `String` | — | Database name |
+| `user` | `String` | -- | Login user |
+| `password` | `String` | -- | Login password |
+| `database` | `String` | -- | Database name |
 | `MeadowConnectionMSSQLAutoConnect` | `Boolean` | `false` | Auto-connect on instantiation (calls `connect()`) |
 
 ### Connection Pool Defaults
@@ -108,7 +108,7 @@ The provider configures sensible pool defaults:
 
 ### `connectAsync(fCallback)`
 
-Open the MSSQL connection pool asynchronously. This is the recommended connection method — MSSQL connections are inherently asynchronous.
+Open the MSSQL connection pool asynchronously. This is the recommended connection method -- MSSQL connections are inherently asynchronous.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
