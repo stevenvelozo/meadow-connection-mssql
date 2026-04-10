@@ -1,0 +1,7 @@
+{
+	"Name": "meadow-connection-mssql",
+	"Version": "1.0.16",
+	"Description": "Meadow MSSQL Plugin",
+	"GeneratedAt": "2026-04-10T01:49:48.056Z",
+	"GitCommit": "297c3f3"
+}

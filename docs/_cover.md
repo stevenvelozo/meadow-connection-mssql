@@ -1,7 +1,5 @@
 # Meadow Connection MSSQL
 
-<small>v1.0.11</small>
-
 > Microsoft SQL Server connection pooling as a Fable service
 
 A wrapper around the [mssql](https://github.com/tediousjs/node-mssql) npm package (Tedious driver) that manages connection pooling, prepared statements, and schema DDL generation. Register once, query from anywhere through Meadow or directly.
