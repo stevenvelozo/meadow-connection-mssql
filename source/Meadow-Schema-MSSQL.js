@@ -67,7 +67,12 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 					tmpPrimaryKey = tmpColumn.Column;
 					break;
 				case 'GUID':
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] VARCHAR(254) DEFAULT '00000000-0000-0000-0000-000000000000'`;
+					// Use NCHAR to match MigrationGenerator (GUID → NCHAR(size))
+					// and the introspector's fixed-width GUID detection.  The
+					// previous VARCHAR(254) was inconsistent with later ALTER
+					// migrations and caused every introspection-then-diff cycle
+					// to re-alter the column.
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] NCHAR(${tmpColumn.Size || '36'}) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
 					break;
 				case 'ForeignKey':
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL DEFAULT 0`;
@@ -496,8 +501,18 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 			return { DataType: 'ID', Size: '' };
 		}
 
-		// Priority 2: Column name contains "GUID" and type is VARCHAR/CHAR → GUID
-		if (tmpName.toUpperCase().indexOf('GUID') >= 0 && (tmpType === 'VARCHAR' || tmpType === 'CHAR' || tmpType === 'NVARCHAR' || tmpType === 'NCHAR'))
+		// Priority 2: Column name contains "GUID" and type is a fixed-width
+		// character type (CHAR/NCHAR) → GUID.  Variable-width types
+		// (VARCHAR/NVARCHAR) are intentionally excluded: meadow schemas
+		// materialize GUID columns as CHAR/NCHAR (see MigrationGenerator
+		// and Meadow-Schema-* providers), and a variable-width column
+		// whose name happens to contain "GUID" (e.g. ExternalSyncGUID
+		// defined as String(255)) is a regular string column.  Including
+		// it here would cause an infinite ALTER loop: the diff would see
+		// DataType=GUID (introspection) vs DataType=String (target) on
+		// every run and issue an ALTER that doesn't actually change the
+		// native type.
+		if (tmpName.toUpperCase().indexOf('GUID') >= 0 && (tmpType === 'CHAR' || tmpType === 'NCHAR'))
 		{
 			return { DataType: 'GUID', Size: pColumnInfo.CHARACTER_MAXIMUM_LENGTH ? String(pColumnInfo.CHARACTER_MAXIMUM_LENGTH) : '' };
 		}
