@@ -9,6 +9,16 @@
 */
 const libFableServiceProviderBase = require('fable-serviceproviderbase');
 
+const libRetry = require('./Meadow-MSSQL-Retry.js');
+
+// Default retry behavior for DDL operations.  CREATE TABLE and CREATE
+// INDEX against a heavily-used MSSQL instance can hit schema locks held
+// by unrelated transactions; retry with exponential backoff so a busy
+// server window doesn't kill a whole deploy.
+const DEFAULT_DDL_MAX_ATTEMPTS   = 5;
+const DEFAULT_DDL_INITIAL_DELAY  = 3000;
+const DEFAULT_DDL_MAX_DELAY      = 30000;
+
 class MeadowSchemaMSSQL extends libFableServiceProviderBase
 {
 	constructor(pFable, pOptions, pServiceHash)
@@ -19,6 +29,11 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 
 		// Reference to the connection pool, set by the connection provider
 		this._ConnectionPool = false;
+
+		// Back-reference to the MeadowConnectionMSSQL that owns this
+		// schema provider.  Used to request a pool recycle when a DDL
+		// failure mode suggests the pooled connection is in a bad state.
+		this._ConnectionProvider = null;
 	}
 
 	/**
@@ -32,6 +47,67 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 		return this;
 	}
 
+	/**
+	 * Set the back-reference to the connection provider.  The retry
+	 * helper uses this to trigger pool recycling on pool-degraded errors.
+	 *
+	 * @param {object} pConnectionProvider - MeadowConnectionMSSQL instance
+	 * @returns {MeadowSchemaMSSQL} this (for chaining)
+	 */
+	setConnectionProvider(pConnectionProvider)
+	{
+		this._ConnectionProvider = pConnectionProvider;
+		return this;
+	}
+
+	/**
+	 * Build the retry options block used by DDL operations.  Honors
+	 * per-provider overrides via options.MSSQL.DDLRetryOptions.
+	 *
+	 * @param {string} pOperationName - name to use in log output
+	 * @returns {Object}
+	 */
+	_ddlRetryOptions(pOperationName)
+	{
+		let tmpMSSQLSettings = this.options.MSSQL || this.fable.settings.MSSQL || {};
+		let tmpRetry = tmpMSSQLSettings.DDLRetryOptions || {};
+
+		let tmpOptions = (
+			{
+				OperationName: pOperationName,
+				MaxAttempts: tmpRetry.MaxAttempts || DEFAULT_DDL_MAX_ATTEMPTS,
+				InitialDelayMs: tmpRetry.InitialDelayMs || DEFAULT_DDL_INITIAL_DELAY,
+				MaxDelayMs: tmpRetry.MaxDelayMs || DEFAULT_DDL_MAX_DELAY,
+				BackoffFactor: tmpRetry.BackoffFactor || 2,
+				// "AlreadyExists" is always treated as success for DDL — a
+				// re-deploy will naturally hit tables that already exist.
+				SuccessModes: [libRetry.ERROR_MODES.AlreadyExists]
+			});
+
+		// Connect the pool recycle hook if we know how to reach the
+		// connection provider (we always do when set up via
+		// Meadow-Connection-MSSQL, but test harnesses sometimes wire the
+		// schema provider standalone).
+		if (this._ConnectionProvider && typeof (this._ConnectionProvider.recyclePool) === 'function')
+		{
+			tmpOptions.OnRecyclePool = (fRecycleDone) =>
+			{
+				this._ConnectionProvider.recyclePool((pErr) =>
+				{
+					// Refresh our pool reference from the connection provider
+					// after the recycle so the next attempt uses the fresh pool.
+					if (this._ConnectionProvider.pool)
+					{
+						this._ConnectionPool = this._ConnectionProvider.pool;
+					}
+					return fRecycleDone(pErr);
+				});
+			};
+		}
+
+		return tmpOptions;
+	}
+
 	generateDropTableStatement(pTableName)
 	{
 		let tmpDropTableStatement = `IF OBJECT_ID('dbo.[${pTableName}]', 'U') IS NOT NULL\n`;
@@ -42,7 +118,7 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 
 	generateCreateTableStatement(pMeadowTableSchema)
 	{
-		this.log.info(`--> Building the table create string for ${pMeadowTableSchema} ...`);
+		this.log.info(`--> Building the table create string for ${pMeadowTableSchema && pMeadowTableSchema.TableName ? pMeadowTableSchema.TableName : '(unknown)'} ...`);
 
 		let tmpPrimaryKey = false;
 		let tmpCreateTableStatement = `--   [ ${pMeadowTableSchema.TableName} ]`;
@@ -136,31 +212,40 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 
 	createTable(pMeadowTableSchema, fCallback)
 	{
+		let tmpTableName = (pMeadowTableSchema && pMeadowTableSchema.TableName) || '(unknown)';
 		let tmpCreateTableStatement = this.generateCreateTableStatement(pMeadowTableSchema);
-		this._ConnectionPool.query(tmpCreateTableStatement)
-			.then((pResult) =>
+
+		// Wrap the DDL in the retry helper.  The helper classifies errors
+		// and handles:
+		//   - AlreadyExists  → treat as success (benign re-deploy)
+		//   - NetworkError   → exponential backoff, pool recycle
+		//   - RequestTimeout → exponential backoff, pool recycle (covers
+		//                      server-side schema-lock contention)
+		//   - PoolDegraded   → exponential backoff, pool recycle
+		//   - ServerError    → fail fast (syntax/permission errors)
+		//   - Unknown        → exponential backoff, no pool recycle
+		//
+		// Every attempt, failure, and recycle decision is logged so the
+		// operator can see at a glance which failure mode is occurring.
+		libRetry.runWithRetry(this.log,
+			this._ddlRetryOptions(`Meadow-MSSQL CREATE TABLE ${tmpTableName}`),
+			(fAttemptDone) =>
 			{
-				this.log.info(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} Success`);
-				this.log.warn(`Meadow-MSSQL Create Table Statement: ${tmpCreateTableStatement}`)
-				return fCallback();
-			})
-			.catch((pError) =>
+				this._ConnectionPool.query(tmpCreateTableStatement)
+					.then((pResult) => fAttemptDone(null, pResult))
+					.catch((pError) => fAttemptDone(pError));
+			},
+			(pError) =>
 			{
-				if (pError.hasOwnProperty('originalError')
-					// TODO: This check may be extraneous; not familiar enough with the mssql node driver yet
-					&& (pError.originalError.hasOwnProperty('info'))
-					// TODO: Validate that there isn't a better way to find this (pError.code isn't explicit enough)
-					&& (pError.originalError.info.message.indexOf("There is already an object named") == 0)
-					&& (pError.originalError.info.message.indexOf('in the database.') > 0))
+				if (pError)
 				{
-					// The table already existed; log a warning but keep on keeping on.
-					return fCallback();
-				}
-				else
-				{
-					this.log.error(`Meadow-MSSQL CREATE TABLE ${pMeadowTableSchema.TableName} failed!`, pError);
+					// runWithRetry already logged the final failure with its
+					// classified mode.  Propagate the error without adding
+					// another noisy error line.
 					return fCallback(pError);
 				}
+				this.log.info(`Meadow-MSSQL CREATE TABLE ${tmpTableName} success`);
+				return fCallback();
 			});
 	}
 
@@ -363,35 +448,46 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 			return fCallback(new Error('Not connected to MSSQL'));
 		}
 
-		// First check if the index already exists
-		this._ConnectionPool.query(pIndexStatement.CheckStatement)
-			.then((pCheckResult) =>
+		// Wrap the (check, then create) sequence in the retry helper — on
+		// a flaky connection either query can time out, and the classifier
+		// will surface whether it's network, lock contention, or a stale
+		// pool.  The retry helper will recycle the pool between attempts
+		// when the failure mode recommends it.
+		libRetry.runWithRetry(this.log,
+			this._ddlRetryOptions(`Meadow-MSSQL CREATE INDEX ${pIndexStatement.Name}`),
+			(fAttemptDone) =>
 			{
-				let tmpExists = pCheckResult && pCheckResult.recordset && pCheckResult.recordset[0] && pCheckResult.recordset[0].IndexExists > 0;
-
-				if (tmpExists)
+				this._ConnectionPool.query(pIndexStatement.CheckStatement)
+					.then((pCheckResult) =>
+					{
+						let tmpExists = pCheckResult && pCheckResult.recordset && pCheckResult.recordset[0] && pCheckResult.recordset[0].IndexExists > 0;
+						if (tmpExists)
+						{
+							// Signal success with a sentinel result so the
+							// outer callback can log the "already exists" case.
+							return fAttemptDone(null, { AlreadyExisted: true });
+						}
+						this._ConnectionPool.query(pIndexStatement.Statement)
+							.then(() => fAttemptDone(null, { AlreadyExisted: false }))
+							.catch((pCreateError) => fAttemptDone(pCreateError));
+					})
+					.catch((pCheckError) => fAttemptDone(pCheckError));
+			},
+			(pError, pResult) =>
+			{
+				if (pError)
+				{
+					return fCallback(pError);
+				}
+				if (pResult && pResult.AlreadyExisted)
 				{
 					this.log.info(`Meadow-MSSQL INDEX ${pIndexStatement.Name} already exists, skipping.`);
-					return fCallback();
 				}
-
-				// Index does not exist; create it
-				this._ConnectionPool.query(pIndexStatement.Statement)
-					.then(() =>
-					{
-						this.log.info(`Meadow-MSSQL CREATE INDEX ${pIndexStatement.Name} executed successfully.`);
-						return fCallback();
-					})
-					.catch((pCreateError) =>
-					{
-						this.log.error(`Meadow-MSSQL CREATE INDEX ${pIndexStatement.Name} failed!`, pCreateError);
-						return fCallback(pCreateError);
-					});
-			})
-			.catch((pCheckError) =>
-			{
-				this.log.error(`Meadow-MSSQL CHECK INDEX ${pIndexStatement.Name} failed!`, pCheckError);
-				return fCallback(pCheckError);
+				else
+				{
+					this.log.info(`Meadow-MSSQL CREATE INDEX ${pIndexStatement.Name} executed successfully.`);
+				}
+				return fCallback();
 			});
 	}
 
