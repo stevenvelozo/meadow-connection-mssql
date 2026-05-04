@@ -148,7 +148,11 @@ class MeadowSchemaMSSQL extends libFableServiceProviderBase
 					// previous VARCHAR(254) was inconsistent with later ALTER
 					// migrations and caused every introspection-then-diff cycle
 					// to re-alter the column.
-					tmpCreateTableStatement += `        [${tmpColumn.Column}] NCHAR(${tmpColumn.Size || '36'}) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
+					//
+					// Default size is 255 — UUIDs need 36 but composite GUIDs
+					// from integration adapters often exceed that, and silent
+					// truncation manifests as missing rows downstream.
+					tmpCreateTableStatement += `        [${tmpColumn.Column}] NCHAR(${tmpColumn.Size || '255'}) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'`;
 					break;
 				case 'ForeignKey':
 					tmpCreateTableStatement += `        [${tmpColumn.Column}] INT NOT NULL DEFAULT 0`;
