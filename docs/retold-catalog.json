@@ -1,135 +1,151 @@
 {
-	"Generated": "2026-04-10T17:20:38.445Z",
+	"Generated": "2026-05-22T05:39:31.066Z",
+	"Mode": "module",
 	"GitHubOrg": "stevenvelozo",
 	"DefaultBranch": "master",
-	"Groups": [
-		{
-			"Name": ".config",
-			"Key": ".config",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "code-server",
-					"Repo": "code-server",
-					"Group": ".config",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				}
-			]
-		},
-		{
-			"Name": "Dist",
-			"Key": "dist",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "indoctrinate_content_staging",
-					"Repo": "indoctrinate_content_staging",
-					"Group": "dist",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				}
-			]
-		},
-		{
-			"Name": "Docs",
-			"Key": "docs",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "api",
-					"Repo": "api",
-					"Group": "docs",
-					"Branch": "master",
-					"HasDocs": true,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": [
-						"api/MSSQL.md",
-						"api/connect.md",
-						"api/connectAsync.md",
-						"api/createTable.md",
-						"api/createTables.md",
-						"api/generateCreateTableStatement.md",
-						"api/generateDropTableStatement.md",
-						"api/pool.md",
-						"api/preparedStatement.md",
-						"api/reference.md"
-					]
-				},
-				{
-					"Name": "css",
-					"Repo": "css",
-					"Group": "docs",
-					"Branch": "master",
-					"HasDocs": true,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": [
-						"css/docuserve.css"
-					]
-				}
-			]
-		},
-		{
-			"Name": "Retold-harness",
-			"Key": "retold-harness",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "data",
-					"Repo": "data",
-					"Group": "retold-harness",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				},
-				{
-					"Name": "model",
-					"Repo": "model",
-					"Group": "retold-harness",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				},
-				{
-					"Name": "test_old",
-					"Repo": "test_old",
-					"Group": "retold-harness",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				}
-			]
-		},
-		{
-			"Name": "Test",
-			"Key": "test",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "docker-init",
-					"Repo": "docker-init",
-					"Group": "test",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				}
-			]
-		}
-	]
+	"Module": {
+		"Name": "meadow-connection-mssql",
+		"Repo": "meadow-connection-mssql",
+		"Group": "",
+		"Branch": "master",
+		"HasDocs": true,
+		"HasCover": true,
+		"Sidebar": [
+			{
+				"Title": "Getting Started",
+				"Children": [
+					{
+						"Title": "Overview",
+						"Path": "README.md"
+					},
+					{
+						"Title": "Quickstart",
+						"Path": "quickstart.md"
+					}
+				]
+			},
+			{
+				"Title": "Architecture",
+				"Children": [
+					{
+						"Title": "Design & Data Flow",
+						"Path": "architecture.md"
+					},
+					{
+						"Title": "Schema & Table Creation",
+						"Path": "schema.md"
+					}
+				]
+			},
+			{
+				"Title": "API Reference",
+				"Children": [
+					{
+						"Title": "Full Reference",
+						"Path": "api/reference.md"
+					},
+					{
+						"Title": "connectAsync()",
+						"Path": "api/connectAsync.md"
+					},
+					{
+						"Title": "connect()",
+						"Path": "api/connect.md"
+					},
+					{
+						"Title": "pool",
+						"Path": "api/pool.md"
+					},
+					{
+						"Title": "preparedStatement",
+						"Path": "api/preparedStatement.md"
+					},
+					{
+						"Title": "MSSQL",
+						"Path": "api/MSSQL.md"
+					},
+					{
+						"Title": "generateCreateTableStatement()",
+						"Path": "api/generateCreateTableStatement.md"
+					},
+					{
+						"Title": "createTable()",
+						"Path": "api/createTable.md"
+					},
+					{
+						"Title": "createTables()",
+						"Path": "api/createTables.md"
+					},
+					{
+						"Title": "generateDropTableStatement()",
+						"Path": "api/generateDropTableStatement.md"
+					}
+				]
+			},
+			{
+				"Title": "Retold Ecosystem",
+				"Children": [
+					{
+						"Title": "Meadow",
+						"Path": "meadow/meadow/README.md"
+					},
+					{
+						"Title": "FoxHound",
+						"Path": "meadow/foxhound/README.md"
+					},
+					{
+						"Title": "Stricture",
+						"Path": "meadow/stricture/README.md"
+					},
+					{
+						"Title": "Meadow Endpoints",
+						"Path": "meadow/meadow-endpoints/README.md"
+					},
+					{
+						"Title": "Meadow Connection MySQL",
+						"Path": "meadow/meadow-connection-mysql/README.md"
+					},
+					{
+						"Title": "Meadow Connection SQLite",
+						"Path": "meadow/meadow-connection-sqlite/README.md"
+					},
+					{
+						"Title": "Meadow Connection RocksDB",
+						"Path": "meadow/meadow-connection-rocksdb/README.md"
+					},
+					{
+						"Title": "Fable",
+						"Path": "fable/fable/README.md"
+					}
+				]
+			}
+		],
+		"DocFiles": [
+			".nojekyll",
+			"README.md",
+			"_brand.json",
+			"_cover.md",
+			"_sidebar.md",
+			"_topbar.md",
+			"_version.json",
+			"api/MSSQL.md",
+			"api/connect.md",
+			"api/connectAsync.md",
+			"api/createTable.md",
+			"api/createTables.md",
+			"api/generateCreateTableStatement.md",
+			"api/generateDropTableStatement.md",
+			"api/pool.md",
+			"api/preparedStatement.md",
+			"api/reference.md",
+			"api.md",
+			"architecture.md",
+			"index.html",
+			"quickstart.md",
+			"retold-catalog.json",
+			"retold-keyword-index.json",
+			"schema.md"
+		]
+	},
+	"Groups": []
 }
