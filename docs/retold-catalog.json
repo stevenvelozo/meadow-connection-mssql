@@ -1,7 +1,7 @@
 {
-	"Generated": "2026-05-22T05:39:31.066Z",
+	"Generated": "2026-05-26T18:19:18.973Z",
 	"Mode": "module",
-	"GitHubOrg": "stevenvelozo",
+	"GitHubOrg": "fable-retold",
 	"DefaultBranch": "master",
 	"Module": {
 		"Name": "meadow-connection-mssql",
@@ -87,35 +87,35 @@
 				"Children": [
 					{
 						"Title": "Meadow",
-						"Path": "meadow/meadow/README.md"
+						"Path": "https://fable-retold.github.io/meadow/README.md"
 					},
 					{
 						"Title": "FoxHound",
-						"Path": "meadow/foxhound/README.md"
+						"Path": "https://fable-retold.github.io/foxhound/README.md"
 					},
 					{
 						"Title": "Stricture",
-						"Path": "meadow/stricture/README.md"
+						"Path": "https://fable-retold.github.io/stricture/README.md"
 					},
 					{
 						"Title": "Meadow Endpoints",
-						"Path": "meadow/meadow-endpoints/README.md"
+						"Path": "https://fable-retold.github.io/meadow-endpoints/README.md"
 					},
 					{
 						"Title": "Meadow Connection MySQL",
-						"Path": "meadow/meadow-connection-mysql/README.md"
+						"Path": "https://fable-retold.github.io/meadow-connection-mysql/README.md"
 					},
 					{
 						"Title": "Meadow Connection SQLite",
-						"Path": "meadow/meadow-connection-sqlite/README.md"
+						"Path": "https://fable-retold.github.io/meadow-connection-sqlite/README.md"
 					},
 					{
 						"Title": "Meadow Connection RocksDB",
-						"Path": "meadow/meadow-connection-rocksdb/README.md"
+						"Path": "https://fable-retold.github.io/meadow-connection-rocksdb/README.md"
 					},
 					{
 						"Title": "Fable",
-						"Path": "fable/fable/README.md"
+						"Path": "https://fable-retold.github.io/fable/README.md"
 					}
 				]
 			}
