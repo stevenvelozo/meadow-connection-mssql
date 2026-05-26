@@ -1,10 +1,10 @@
 # Meadow Connection MSSQL
 
-> **[&#9654; Read the Meadow-Connection-Mssql Documentation](https://stevenvelozo.github.io/meadow-connection-mssql/)** &mdash; interactive docs with the full API reference.
+> **[&#9654; Read the Meadow-Connection-Mssql Documentation](https://fable-retold.github.io/meadow-connection-mssql/)** &mdash; interactive docs with the full API reference.
 
 A Microsoft SQL Server connection provider for the Meadow ORM. Wraps [mssql](https://github.com/tediousjs/node-mssql) (Tedious) as a Fable service, providing connection pooling with configurable timeouts, prepared statements, and DDL generation from Meadow table schemas.
 
-[![Build Status](https://github.com/stevenvelozo/meadow-connection-mssql/workflows/Meadow-Connection-MSSQL/badge.svg)](https://github.com/stevenvelozo/meadow-connection-mssql/actions)
+[![Build Status](https://github.com/fable-retold/meadow-connection-mssql/workflows/Meadow-Connection-MSSQL/badge.svg)](https://github.com/fable-retold/meadow-connection-mssql/actions)
 [![npm version](https://badge.fury.io/js/meadow-connection-mssql.svg)](https://badge.fury.io/js/meadow-connection-mssql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -174,13 +174,13 @@ Generate a safe `DROP TABLE` statement using `IF OBJECT_ID` to check existence b
 
 Meadow Connection MSSQL is a database connector for the Meadow data access layer:
 
-- [meadow](https://github.com/stevenvelozo/meadow) -- ORM and data access framework
-- [foxhound](https://github.com/stevenvelozo/foxhound) -- Query DSL used by Meadow
-- [stricture](https://github.com/stevenvelozo/stricture) -- Schema definition tool
-- [meadow-endpoints](https://github.com/stevenvelozo/meadow-endpoints) -- RESTful endpoint generation
-- [meadow-connection-mysql](https://github.com/stevenvelozo/meadow-connection-mysql) -- MySQL connector
-- [meadow-connection-sqlite](https://github.com/stevenvelozo/meadow-connection-sqlite) -- SQLite connector
-- [fable](https://github.com/stevenvelozo/fable) -- Application services framework
+- [meadow](https://github.com/fable-retold/meadow) -- ORM and data access framework
+- [foxhound](https://github.com/fable-retold/foxhound) -- Query DSL used by Meadow
+- [stricture](https://github.com/fable-retold/stricture) -- Schema definition tool
+- [meadow-endpoints](https://github.com/fable-retold/meadow-endpoints) -- RESTful endpoint generation
+- [meadow-connection-mysql](https://github.com/fable-retold/meadow-connection-mysql) -- MySQL connector
+- [meadow-connection-sqlite](https://github.com/fable-retold/meadow-connection-sqlite) -- SQLite connector
+- [fable](https://github.com/fable-retold/fable) -- Application services framework
 
 ## Testing
 
@@ -198,10 +198,10 @@ npm run coverage
 
 ## Related Packages
 
-- [meadow](https://github.com/stevenvelozo/meadow) -- Data access and ORM
-- [meadow-connection-mysql](https://github.com/stevenvelozo/meadow-connection-mysql) -- MySQL connection provider
-- [meadow-connection-rocksdb](https://github.com/stevenvelozo/meadow-connection-rocksdb) -- RocksDB connection provider
-- [fable](https://github.com/stevenvelozo/fable) -- Application services framework
+- [meadow](https://github.com/fable-retold/meadow) -- Data access and ORM
+- [meadow-connection-mysql](https://github.com/fable-retold/meadow-connection-mysql) -- MySQL connection provider
+- [meadow-connection-rocksdb](https://github.com/fable-retold/meadow-connection-rocksdb) -- RocksDB connection provider
+- [fable](https://github.com/fable-retold/fable) -- Application services framework
 
 ## License
 

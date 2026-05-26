@@ -16,4 +16,4 @@ A wrapper around the [mssql](https://github.com/tediousjs/node-mssql) npm packag
 [Architecture](architecture.md)
 [Schema & Tables](schema.md)
 [API Reference](api/reference.md)
-[GitHub](https://github.com/stevenvelozo/meadow-connection-mssql)
+[GitHub](https://github.com/fable-retold/meadow-connection-mssql)
