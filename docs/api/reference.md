@@ -6,7 +6,7 @@ Complete method and property documentation for `MeadowConnectionMSSQL`.
 
 ## Class: MeadowConnectionMSSQL
 
-Extends `FableServiceProviderBase` from [fable-serviceproviderbase](https://github.com/fable-retold/fable-serviceproviderbase).
+Extends `FableServiceProviderBase` from [fable-serviceproviderbase](https://fable-retold.github.io/fable-serviceproviderbase/).
 
 ```javascript
 const libMeadowConnectionMSSQL = require('meadow-connection-mssql');
