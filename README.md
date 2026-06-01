@@ -4,9 +4,7 @@
 
 A Microsoft SQL Server connection provider for the Meadow ORM. Wraps [mssql](https://github.com/tediousjs/node-mssql) (Tedious) as a Fable service, providing connection pooling with configurable timeouts, prepared statements, and DDL generation from Meadow table schemas.
 
-[![Build Status](https://github.com/fable-retold/meadow-connection-mssql/workflows/Meadow-Connection-MSSQL/badge.svg)](https://github.com/fable-retold/meadow-connection-mssql/actions)
-[![npm version](https://badge.fury.io/js/meadow-connection-mssql.svg)](https://badge.fury.io/js/meadow-connection-mssql)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[meadow-connection-mssql on npm](https://www.npmjs.com/package/meadow-connection-mssql) | [MIT License](LICENSE)
 
 ---
 
