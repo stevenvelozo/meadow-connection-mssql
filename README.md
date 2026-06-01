@@ -1,6 +1,6 @@
 # Meadow Connection MSSQL
 
-> **[&#9654; Read the Meadow-Connection-Mssql Documentation](https://fable-retold.github.io/meadow-connection-mssql/)** &mdash; interactive docs with the full API reference.
+> **[Read the Meadow-Connection-Mssql Documentation](https://fable-retold.github.io/meadow-connection-mssql/)** - interactive docs with the full API reference.
 
 A Microsoft SQL Server connection provider for the Meadow ORM. Wraps [mssql](https://github.com/tediousjs/node-mssql) (Tedious) as a Fable service, providing connection pooling with configurable timeouts, prepared statements, and DDL generation from Meadow table schemas.
 
