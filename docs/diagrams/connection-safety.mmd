@@ -1,0 +1,14 @@
+flowchart TD
+	A[connectAsync called] --> B{Callback provided?}
+	B -->|No| C[Log error, create no-op callback]
+	B -->|Yes| D{Pool already exists?}
+	C --> D
+	D -->|Yes| E[Log error with cleansed settings]
+	E --> F[Return existing pool via callback]
+	D -->|No| G[Log connection details]
+	G --> H[mssql.connect with Promise]
+	H --> I{Success?}
+	I -->|Yes| J[Set pool and connected = true]
+	J --> K[Return pool via callback]
+	I -->|No| L[Log error]
+	L --> M[Return error via callback]

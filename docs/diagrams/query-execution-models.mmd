@@ -1,0 +1,17 @@
+flowchart LR
+	subgraph Direct["Direct Query (pool.query)"]
+		A1[SQL String] --> B1[pool.query]
+		B1 --> C1[Promise]
+		C1 --> D1[result.recordset]
+	end
+
+	subgraph Prepared["Prepared Statement"]
+		A2[SQL Template] --> B2[ps.prepare]
+		B2 --> C2[ps.input types]
+		C2 --> D2[ps.execute params]
+		D2 --> E2[result.recordset]
+		E2 --> F2[ps.unprepare]
+	end
+
+	style Direct fill:#e8f4f8,stroke:#2E7D74
+	style Prepared fill:#f5f0e8,stroke:#423D37

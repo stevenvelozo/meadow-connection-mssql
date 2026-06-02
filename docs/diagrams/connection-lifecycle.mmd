@@ -1,0 +1,28 @@
+sequenceDiagram
+	participant App as Application
+	participant Fable as Fable Instance
+	participant MCS as MeadowConnectionMSSQL
+	participant Pool as mssql Pool
+	participant SQL as SQL Server
+
+	App->>Fable: new libFable(config)
+	App->>Fable: addServiceType('MeadowMSSQLProvider', ...)
+	App->>Fable: instantiateServiceProvider('MeadowMSSQLProvider')
+	Fable->>MCS: constructor(fable, manifest, hash)
+	MCS->>MCS: Copy MSSQL settings from fable.settings
+	MCS->>MCS: Default port to 1433
+	MCS-->>MCS: connected = false
+
+	App->>MCS: connectAsync(callback)
+	MCS->>Pool: mssql.connect(settings)
+	Note over Pool,SQL: Promise-based TDS handshake
+	Pool->>SQL: Establish TCP + TDS connection
+	SQL-->>Pool: Connected
+	Pool-->>MCS: Connection pool ready
+	MCS-->>MCS: connected = true
+	MCS-->>App: callback(null, pool)
+
+	App->>Pool: pool.query(sql)
+	Pool->>SQL: Execute query (TDS)
+	SQL-->>Pool: Result set
+	Pool-->>App: Promise resolves with { recordset }

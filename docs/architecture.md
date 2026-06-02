@@ -6,39 +6,8 @@ Meadow Connection MSSQL bridges the Meadow data access layer and Microsoft SQL S
 
 ## System Architecture
 
-```mermaid
-graph TB
-	subgraph Application
-		A[Application Code]
-		B[Meadow ORM]
-		C[FoxHound Query DSL]
-	end
-
-	subgraph MeadowConnectionMSSQL["Meadow Connection MSSQL"]
-		D[MeadowConnectionMSSQL Service]
-		E[PreparedStatement Factory]
-		F[MSSQL Type Constants]
-		G[mssql Connection Pool]
-	end
-
-	subgraph Database["SQL Server"]
-		H[Microsoft SQL Server]
-	end
-
-	A -->|doCreate / doRead / doUpdate / doDelete| B
-	B -->|setProvider MSSQL| C
-	C -->|SQL + Parameters| D
-	D -->|Prepared Statements| E
-	D -->|Type Definitions| F
-	E --> G
-	F --> G
-	D --> G
-	G -->|TDS Protocol| H
-
-	style MeadowConnectionMSSQL fill:#e8f4f8,stroke:#2E7D74,stroke-width:2px
-	style Application fill:#f5f0e8,stroke:#423D37,stroke-width:1px
-	style Database fill:#fef3e2,stroke:#c97a2e,stroke-width:1px
-```
+<!-- bespoke diagram: edit diagrams/system-architecture.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![System Architecture](diagrams/system-architecture.svg)
 
 ---
 
@@ -72,36 +41,8 @@ The `MSSQL` getter exposes the raw `mssql` npm package, giving access to SQL Ser
 
 ## Connection Lifecycle
 
-```mermaid
-sequenceDiagram
-	participant App as Application
-	participant Fable as Fable Instance
-	participant MCS as MeadowConnectionMSSQL
-	participant Pool as mssql Pool
-	participant SQL as SQL Server
-
-	App->>Fable: new libFable(config)
-	App->>Fable: addServiceType('MeadowMSSQLProvider', ...)
-	App->>Fable: instantiateServiceProvider('MeadowMSSQLProvider')
-	Fable->>MCS: constructor(fable, manifest, hash)
-	MCS->>MCS: Copy MSSQL settings from fable.settings
-	MCS->>MCS: Default port to 1433
-	MCS-->>MCS: connected = false
-
-	App->>MCS: connectAsync(callback)
-	MCS->>Pool: mssql.connect(settings)
-	Note over Pool,SQL: Promise-based TDS handshake
-	Pool->>SQL: Establish TCP + TDS connection
-	SQL-->>Pool: Connected
-	Pool-->>MCS: Connection pool ready
-	MCS-->>MCS: connected = true
-	MCS-->>App: callback(null, pool)
-
-	App->>Pool: pool.query(sql)
-	Pool->>SQL: Execute query (TDS)
-	SQL-->>Pool: Result set
-	Pool-->>App: Promise resolves with { recordset }
-```
+<!-- bespoke diagram: edit diagrams/connection-lifecycle.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![Connection Lifecycle](diagrams/connection-lifecycle.svg)
 
 ---
 
@@ -109,25 +50,8 @@ sequenceDiagram
 
 MSSQL supports two distinct query patterns:
 
-```mermaid
-flowchart LR
-	subgraph Direct["Direct Query (pool.query)"]
-		A1[SQL String] --> B1[pool.query]
-		B1 --> C1[Promise]
-		C1 --> D1[result.recordset]
-	end
-
-	subgraph Prepared["Prepared Statement"]
-		A2[SQL Template] --> B2[ps.prepare]
-		B2 --> C2[ps.input types]
-		C2 --> D2[ps.execute params]
-		D2 --> E2[result.recordset]
-		E2 --> F2[ps.unprepare]
-	end
-
-	style Direct fill:#e8f4f8,stroke:#2E7D74
-	style Prepared fill:#f5f0e8,stroke:#423D37
-```
+<!-- bespoke diagram: edit diagrams/query-execution-models.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![Query Execution Models](diagrams/query-execution-models.svg)
 
 ### Direct Query
 
@@ -158,25 +82,8 @@ Meadow's MSSQL provider uses prepared statements for all CRUD operations.
 
 ## Connection Settings Flow
 
-```mermaid
-flowchart TD
-	A[Constructor Called] --> B{fable.settings.MSSQL exists?}
-	B -->|Yes| C[Copy server, port, user, password, database]
-	B -->|No| D[No MSSQL config available]
-	C --> E{port provided?}
-	E -->|Yes| F[Use provided port]
-	E -->|No| G[Default to 1433]
-	F --> H[Store in this.options]
-	G --> H
-
-	H --> I[connectAsync called]
-	I --> J[Build connection settings]
-	J --> K[Add hardcoded pool/timeout settings]
-	K --> L[mssql.connect with Promise]
-	L --> M{Connection success?}
-	M -->|Yes| N[Set connected = true]
-	M -->|No| O[Pass error to callback]
-```
+<!-- bespoke diagram: edit diagrams/connection-settings-flow.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![Connection Settings Flow](diagrams/connection-settings-flow.svg)
 
 ### Hardcoded Pool Settings
 
@@ -198,29 +105,8 @@ These settings are applied internally and are not currently configurable via Fab
 
 The `generateCreateTableStatement()` method walks a Meadow table schema and produces MSSQL DDL:
 
-```mermaid
-flowchart LR
-	A[Meadow Table Schema] --> B[Walk Columns Array]
-	B --> C{DataType?}
-	C -->|ID| D["INT NOT NULL IDENTITY PRIMARY KEY"]
-	C -->|GUID| E["VARCHAR(254) DEFAULT '000...'"]
-	C -->|ForeignKey| F["INT UNSIGNED NOT NULL DEFAULT 0"]
-	C -->|Numeric| G["INT NOT NULL DEFAULT 0"]
-	C -->|Decimal| H["DECIMAL(Size)"]
-	C -->|String| I["VARCHAR(Size) DEFAULT ''"]
-	C -->|Text| J["TEXT"]
-	C -->|DateTime| K["DATETIME"]
-	C -->|Boolean| L["TINYINT DEFAULT 0"]
-	D --> M["CREATE TABLE [dbo].[TableName] (...)"]
-	E --> M
-	F --> M
-	G --> M
-	H --> M
-	I --> M
-	J --> M
-	K --> M
-	L --> M
-```
+<!-- bespoke diagram: edit diagrams/ddl-generation-flow.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![DDL Generation Flow](diagrams/ddl-generation-flow.svg)
 
 ### MSSQL DDL Conventions
 
@@ -235,22 +121,8 @@ flowchart LR
 
 ## Connection Safety
 
-```mermaid
-flowchart TD
-	A[connectAsync called] --> B{Callback provided?}
-	B -->|No| C[Log error, create no-op callback]
-	B -->|Yes| D{Pool already exists?}
-	C --> D
-	D -->|Yes| E[Log error with cleansed settings]
-	E --> F[Return existing pool via callback]
-	D -->|No| G[Log connection details]
-	G --> H[mssql.connect with Promise]
-	H --> I{Success?}
-	I -->|Yes| J[Set pool and connected = true]
-	J --> K[Return pool via callback]
-	I -->|No| L[Log error]
-	L --> M[Return error via callback]
-```
+<!-- bespoke diagram: edit diagrams/connection-safety.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![Connection Safety](diagrams/connection-safety.svg)
 
 ### Password Protection
 
@@ -264,33 +136,8 @@ flowchart TD
 
 When a Meadow entity sets its provider to `'MSSQL'`, queries follow this path:
 
-```mermaid
-sequenceDiagram
-	participant App as Application
-	participant Meadow as Meadow Entity
-	participant FH as FoxHound
-	participant Provider as Meadow-Provider-MSSQL
-	participant MCS as MeadowConnectionMSSQL
-	participant PS as PreparedStatement
-	participant Pool as mssql Pool
-
-	App->>Meadow: doReads(query, callback)
-	Meadow->>FH: Build SQL query
-	FH-->>Meadow: SQL string + parameters
-	Meadow->>Provider: Execute read
-	Provider->>MCS: Get preparedStatement
-	MCS-->>Provider: New mssql.PreparedStatement
-	Provider->>PS: input(name, type) for each param
-	Provider->>PS: prepare(sql)
-	PS->>Pool: Prepare on pool
-	Provider->>PS: execute(params)
-	PS->>Pool: Execute prepared query
-	Pool-->>PS: Result recordset
-	PS-->>Provider: result.recordset
-	Provider->>PS: unprepare()
-	Provider-->>Meadow: Marshalled records
-	Meadow-->>App: callback(error, query, records)
-```
+<!-- bespoke diagram: edit diagrams/meadow-integration.mmd or .hints.json, then: npx pict-renderer-graph build modules/meadow/meadow-connection-mssql/docs -->
+![Meadow Integration](diagrams/meadow-integration.svg)
 
 The MSSQL provider uses prepared statements for all operations, with `SCOPE_IDENTITY()` for retrieving auto-generated IDs after inserts.
 

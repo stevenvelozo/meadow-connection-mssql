@@ -1,0 +1,25 @@
+sequenceDiagram
+	participant App as Application
+	participant Meadow as Meadow Entity
+	participant FH as FoxHound
+	participant Provider as Meadow-Provider-MSSQL
+	participant MCS as MeadowConnectionMSSQL
+	participant PS as PreparedStatement
+	participant Pool as mssql Pool
+
+	App->>Meadow: doReads(query, callback)
+	Meadow->>FH: Build SQL query
+	FH-->>Meadow: SQL string + parameters
+	Meadow->>Provider: Execute read
+	Provider->>MCS: Get preparedStatement
+	MCS-->>Provider: New mssql.PreparedStatement
+	Provider->>PS: input(name, type) for each param
+	Provider->>PS: prepare(sql)
+	PS->>Pool: Prepare on pool
+	Provider->>PS: execute(params)
+	PS->>Pool: Execute prepared query
+	Pool-->>PS: Result recordset
+	PS-->>Provider: result.recordset
+	Provider->>PS: unprepare()
+	Provider-->>Meadow: Marshalled records
+	Meadow-->>App: callback(error, query, records)

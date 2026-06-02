@@ -1,0 +1,17 @@
+flowchart TD
+	A[Constructor Called] --> B{fable.settings.MSSQL exists?}
+	B -->|Yes| C[Copy server, port, user, password, database]
+	B -->|No| D[No MSSQL config available]
+	C --> E{port provided?}
+	E -->|Yes| F[Use provided port]
+	E -->|No| G[Default to 1433]
+	F --> H[Store in this.options]
+	G --> H
+
+	H --> I[connectAsync called]
+	I --> J[Build connection settings]
+	J --> K[Add hardcoded pool/timeout settings]
+	K --> L[mssql.connect with Promise]
+	L --> M{Connection success?}
+	M -->|Yes| N[Set connected = true]
+	M -->|No| O[Pass error to callback]

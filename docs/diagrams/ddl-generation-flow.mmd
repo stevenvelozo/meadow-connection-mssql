@@ -1,0 +1,21 @@
+flowchart LR
+	A[Meadow Table Schema] --> B[Walk Columns Array]
+	B --> C{DataType?}
+	C -->|ID| D["INT NOT NULL IDENTITY PRIMARY KEY"]
+	C -->|GUID| E["VARCHAR(254) DEFAULT '000...'"]
+	C -->|ForeignKey| F["INT UNSIGNED NOT NULL DEFAULT 0"]
+	C -->|Numeric| G["INT NOT NULL DEFAULT 0"]
+	C -->|Decimal| H["DECIMAL(Size)"]
+	C -->|String| I["VARCHAR(Size) DEFAULT ''"]
+	C -->|Text| J["TEXT"]
+	C -->|DateTime| K["DATETIME"]
+	C -->|Boolean| L["TINYINT DEFAULT 0"]
+	D --> M["CREATE TABLE [dbo].[TableName] (...)"]
+	E --> M
+	F --> M
+	G --> M
+	H --> M
+	I --> M
+	J --> M
+	K --> M
+	L --> M

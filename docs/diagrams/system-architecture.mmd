@@ -1,0 +1,31 @@
+graph TB
+	subgraph Application
+		A[Application Code]
+		B[Meadow ORM]
+		C[FoxHound Query DSL]
+	end
+
+	subgraph MeadowConnectionMSSQL["Meadow Connection MSSQL"]
+		D[MeadowConnectionMSSQL Service]
+		E[PreparedStatement Factory]
+		F[MSSQL Type Constants]
+		G[mssql Connection Pool]
+	end
+
+	subgraph Database["SQL Server"]
+		H[Microsoft SQL Server]
+	end
+
+	A -->|doCreate / doRead / doUpdate / doDelete| B
+	B -->|setProvider MSSQL| C
+	C -->|SQL + Parameters| D
+	D -->|Prepared Statements| E
+	D -->|Type Definitions| F
+	E --> G
+	F --> G
+	D --> G
+	G -->|TDS Protocol| H
+
+	style MeadowConnectionMSSQL fill:#e8f4f8,stroke:#2E7D74,stroke-width:2px
+	style Application fill:#f5f0e8,stroke:#423D37,stroke-width:1px
+	style Database fill:#fef3e2,stroke:#c97a2e,stroke-width:1px
